@@ -1,4 +1,4 @@
-# evolutionSimulation
+# Evolution Simulation
 Evolution simulation in pygame using NEAT.
 
 Each generation a batch of organisms is spawned on a map full of food. The organisms' actions are controlled by a neural network which determines whether the organism will move left, right or forward, based on the information of the closest food object within their vision.
