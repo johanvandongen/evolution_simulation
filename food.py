@@ -205,10 +205,10 @@ class Organism:
         return None # Return None if object is not in vision (distance/angle)
     
     # When an organism is clicked with mouse, do something here
-    def click(self, stats_screen):
+    def click(self, stats_screen, win):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        cam_offset_x = ((INTERNAL_SURFACE_SIZE_VECTOR[0]*camera.zoom_scale)/2 - WIN_WIDTH/2 - camera.offset.x)
-        cam_offset_y = ((INTERNAL_SURFACE_SIZE_VECTOR[1]*camera.zoom_scale)/2 - WIN_HEIGHT/2 - camera.offset.y)
+        cam_offset_x = ((INTERNAL_SURFACE_SIZE_VECTOR[0]*camera.zoom_scale)/2 - win.get_size()[0]/2 - camera.offset.x)
+        cam_offset_y = ((INTERNAL_SURFACE_SIZE_VECTOR[1]*camera.zoom_scale)/2 - win.get_size()[1]/2 - camera.offset.y)
         mouse_x += cam_offset_x
         mouse_y += cam_offset_y
         mouse_x *= 1/camera.zoom_scale  # no idea why this calculation is needed, but based on testing and observations 
@@ -277,11 +277,11 @@ class Camera:
         scaled_surf = pygame.transform.scale(self.internal_surface, INTERNAL_SURFACE_SIZE_VECTOR*self.zoom_scale)
         
         # Blit surface on the window
-        win.blit(scaled_surf, scaled_surf.get_rect(center=(WIN_WIDTH/2+self.offset.x,WIN_HEIGHT/2+self.offset.y)))
+        win.blit(scaled_surf, scaled_surf.get_rect(center=(win.get_size()[0]/2+self.offset.x,win.get_size()[1]/2+self.offset.y)))
      
         # Draw menu (with stats etc) on window on top of simulation surface
-        pygame.draw.rect(win, MENU_COLOR, pygame.Rect(0, MENU_Y_HEIGHT, WIN_WIDTH, WIN_HEIGHT-MENU_Y_HEIGHT))
-        pygame.draw.line(win, "black", (0, MENU_Y_HEIGHT), (WIN_WIDTH, MENU_Y_HEIGHT), 2)
+        pygame.draw.rect(win, MENU_COLOR, pygame.Rect(0, MENU_Y_HEIGHT, win.get_size()[0], win.get_size()[1]-MENU_Y_HEIGHT))
+        pygame.draw.line(win, "black", (0, MENU_Y_HEIGHT), (win.get_size()[0], MENU_Y_HEIGHT), 2)
         for button in buttons:
             button.draw(win) 
         
@@ -334,12 +334,13 @@ def main(genomes, config):
 
     # Initialisations
     run = True
-    win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    win = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     clock = pygame.time.Clock()
     button_pause = Button("Pause", (240, MENU_Y_HEIGHT+10), font_size=25)
     button_change_style = Button("Draw vision", (240, MENU_Y_HEIGHT+50), font_size=25, pressed=not settings.draw_vision_lines)
     button_draw_nn = Button("Draw nn", (240, MENU_Y_HEIGHT+90), font_size=25, pressed=not settings.draw_nn)
     button_draw_nn_node_names = Button("Node names", (350, MENU_Y_HEIGHT+90), font_size=25, pressed=not settings.draw_node_names)
+    button_exit = Button("Exit", (win.get_size()[0] - 100, 10), font_size=25, pressed=False)
     foods = []
     
     # Generate initial food
@@ -352,7 +353,7 @@ def main(genomes, config):
     food_kd_tree = KdTree(all_food)
         
     # Show stats for organism (organism can be chanhed in the simulation by clicking)
-    stats = StatsScreen(organisms[0], WIN_WIDTH, WIN_HEIGHT, MENU_Y_HEIGHT, MENU_TEXT_COLOR)
+    stats = StatsScreen(organisms[0], win.get_size()[0], win.get_size()[1], MENU_Y_HEIGHT, MENU_TEXT_COLOR)
     
     # Game loop - Or with neat, this is the fitness function
     while run:
@@ -361,6 +362,11 @@ def main(genomes, config):
         # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
+                quit()
+            
+            if button_exit.click(event):
                 run = False
                 pygame.quit()
                 quit()
@@ -401,10 +407,10 @@ def main(genomes, config):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:
                     for organism in organisms:
-                        organism.click(stats)
+                        organism.click(stats, win)
         
         if settings.paused:
-            camera.draw_window(win, stats, [button_pause, button_change_style, button_draw_nn, button_draw_nn_node_names], foods, organisms, vision_lines, angle_difference_stat, generation, config)
+            camera.draw_window(win, stats, [button_pause, button_change_style, button_draw_nn, button_draw_nn_node_names, button_exit], foods, organisms, vision_lines, angle_difference_stat, generation, config)
             continue
         
         # Stop game when there are no more organisms (neat will then start new generation)
@@ -489,7 +495,7 @@ def main(genomes, config):
                 ge.pop(i)
 
         # Draw everything
-        camera.draw_window(win, stats, [button_pause, button_change_style, button_draw_nn, button_draw_nn_node_names], foods, organisms, vision_lines, angle_difference_stat, generation, config)
+        camera.draw_window(win, stats, [button_pause, button_change_style, button_draw_nn, button_draw_nn_node_names, button_exit], foods, organisms, vision_lines, angle_difference_stat, generation, config)
 
 class MyGenome(neat.DefaultGenome):
 
