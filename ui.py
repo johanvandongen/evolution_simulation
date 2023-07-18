@@ -69,7 +69,7 @@ class StatsScreen:
 
         # Draw organism changing stats like energy
         y = self.MENU_Y_POS
-        stats_list = ["energy: "+ str(self.organism.energy), "angle: "+str(self.organism.angle), "health: "+str(self.organism.health)]
+        stats_list = ["energy: "+ str(round(self.organism.energy, 2)), "angle: "+str(self.organism.angle), "health: "+str(self.organism.health)]
         for stat in stats_list:
             text = STAT_FONT.render(stat, 1, self.text_color)
             win.blit(text, (self.x+self.width+self.margin, y))
