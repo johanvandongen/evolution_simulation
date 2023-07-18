@@ -491,9 +491,21 @@ def main(genomes, config):
         # Draw everything
         camera.draw_window(win, stats, [button_pause, button_change_style, button_draw_nn, button_draw_nn_node_names], foods, organisms, vision_lines, angle_difference_stat, generation, config)
 
+class MyGenome(neat.DefaultGenome):
+
+    def __init__(self, key):
+        super().__init__(key)
+        self.parent_key1 = None
+        self.parent_key2 = None
+
+    def configure_crossover(self, genome1, genome2, config):
+        self.parent_key1 = genome1.key
+        self.parent_key2 = genome2.key
+        super().configure_crossover(genome1, genome2, config)
+    
 # Run neat algorithm
 def run(config_path):
-    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
+    config = neat.config.Config(MyGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
     
     p = neat.Population(config) # Create population based on config file
     
