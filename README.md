@@ -5,13 +5,14 @@ Each generation a batch of organisms is spawned on a map full of food. The organ
 
 The neural networks, as well as the physical traits of an organism, evolve over time, as each generation the best performing organisms are selected and bred to create the population for the next generation.
 
-## Uses the following libraries
-- neat-python
-- pygame
-- numpy
-
+## Usage
 Install all required packages by running:
+
 `pip install -r requirements.txt`
+
+After installing the required dependencies, you can run the project by typing the following command in the root folder:
+
+`main.py`
 
 ### Simulation controls
 - Press `ESC` to close and exit the program
